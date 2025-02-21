@@ -1,0 +1,43 @@
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "sync"
+    "time"
+)
+
+func worker(id int, jobs <-chan int, results chan<- int, wg *sync.WaitGroup) {
+    defer wg.Done()
+    for j := range jobs {
+        fmt.Printf("Worker %d started job %d\n", id, j)
+        time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
+        fmt.Printf("Worker %d finished job %d\n", id, j)
+        results <- j * 2
+    }
+}
+
+func main() {
+    rand.Seed(time.Now().UnixNano())
+    jobs := make(chan int, 10)
+    results := make(chan int, 10)
+    var wg sync.WaitGroup
+
+    numWorkers := 3
+    for w := 1; w <= numWorkers; w++ {
+        wg.Add(1)
+        go worker(w, jobs, results, &wg)
+    }
+
+    for j := 1; j <= 10; j++ {
+        jobs <- j
+    }
+    close(jobs)
+
+    wg.Wait()
+    close(results)
+
+    for result := range results {
+        fmt.Println("Result:", result)
+    }
+}
