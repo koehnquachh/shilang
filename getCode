@@ -1,0 +1,8 @@
+const address = '0xSomeEthereumAddress';
+web3.eth.getCode(address).then(code => {
+    if (code === '0x') {
+        console.log('This address is not a contract.');
+    } else {
+        console.log('This address is a contract.');
+    }
+});
