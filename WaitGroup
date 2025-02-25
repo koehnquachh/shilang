@@ -1,0 +1,53 @@
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"sync"
+	"time"
+)
+
+func fetchURL(url string, wg *sync.WaitGroup, results chan<- string) {
+	defer wg.Done()
+	resp, err := http.Get(url)
+	if err != nil {
+		results <- fmt.Sprintf("Error fetching %s: %v", url, err)
+		return
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		results <- fmt.Sprintf("Error reading %s: %v", url, err)
+		return
+	}
+	results <- fmt.Sprintf("Fetched %s (%d bytes)", url, len(body))
+}
+
+func main() {
+	urls := []string{
+		"https://www.example.com",
+		"https://www.google.com",
+		"https://www.github.com",
+		"https://www.stackoverflow.com",
+	}
+
+	var wg sync.WaitGroup
+	results := make(chan string, len(urls))
+
+	start := time.Now()
+
+	for _, url := range urls {
+		wg.Add(1)
+		go fetchURL(url, &wg, results)
+	}
+
+	wg.Wait()
+	close(results)
+
+	for res := range results {
+		fmt.Println(res)
+	}
+
+	fmt.Printf("Crawled %d URLs in %v\n", len(urls), time.Since(start))
+}
