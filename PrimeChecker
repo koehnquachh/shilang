@@ -1,0 +1,25 @@
+import java.util.concurrent.*;
+import java.util.*;
+
+public class PrimeChecker {
+    public static boolean isPrime(int number) {
+        if(number < 2) return false;
+        for(int i = 2; i <= Math.sqrt(number); i++){
+            if(number % i == 0) return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        List<Future<Boolean>> futures = new ArrayList<>();
+        List<Integer> numbers = Arrays.asList(101, 103, 107, 109, 113);
+        for (int num : numbers) {
+            futures.add(executor.submit(() -> isPrime(num)));
+        }
+        for (int i = 0; i < numbers.size(); i++) {
+            System.out.println(numbers.get(i) + " is prime? " + futures.get(i).get());
+        }
+        executor.shutdown();
+    }
+}
