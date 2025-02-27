@@ -1,0 +1,19 @@
+class DynamicMethods
+  def self.create_method(name, &block)
+    define_method(name, &block)
+  end
+end
+
+class MyClass < DynamicMethods
+  create_method(:greet) do |name|
+    "Hello, #{name}!"
+  end
+
+  create_method(:farewell) do |name|
+    "Goodbye, #{name}!"
+  end
+end
+
+obj = MyClass.new
+puts obj.greet("Alice")
+puts obj.farewell("Bob")
