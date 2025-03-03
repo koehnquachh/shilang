@@ -1,0 +1,26 @@
+import threading
+import requests
+from bs4 import BeautifulSoup
+
+def scrape(url):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        print(f"Title of {url}: {soup.title.string}")
+    except Exception as e:
+        print(f"Error scraping {url}: {e}")
+
+urls = [
+    'https://example.com',
+    'https://python.org',
+    'https://github.com'
+]
+
+threads = []
+for url in urls:
+    t = threading.Thread(target=scrape, args=(url,))
+    t.start()
+    threads.append(t)
+
+for t in threads:
+    t.join()
