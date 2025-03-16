@@ -1,0 +1,42 @@
+#include <iostream>
+#include <vector>
+#include <thread>
+#include <algorithm>
+
+void quicksort(std::vector<int>& arr, int left, int right) {
+    if (left >= right) return;
+    int pivot = arr[right];
+    int partitionIndex = left;
+    for (int i = left; i < right; i++) {
+        if (arr[i] < pivot) {
+            std::swap(arr[i], arr[partitionIndex]);
+            partitionIndex++;
+        }
+    }
+    std::swap(arr[partitionIndex], arr[right]);
+    
+    // 根据子数组大小判断是否使用线程并行处理
+    std::thread t1, t2;
+    if (partitionIndex - left > 1000) {
+        t1 = std::thread(quicksort, std::ref(arr), left, partitionIndex - 1);
+    } else {
+        quicksort(arr, left, partitionIndex - 1);
+    }
+    if (right - partitionIndex > 1000) {
+        t2 = std::thread(quicksort, std::ref(arr), partitionIndex + 1, right);
+    } else {
+        quicksort(arr, partitionIndex + 1, right);
+    }
+    if (t1.joinable()) t1.join();
+    if (t2.joinable()) t2.join();
+}
+
+int main() {
+    std::vector<int> arr = {10, 7, 8, 9, 1, 5, 3, 2, 4, 6};
+    quicksort(arr, 0, arr.size() - 1);
+    for (int i : arr) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+    return 0;
+}
