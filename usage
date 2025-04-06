@@ -1,0 +1,7 @@
+#!/bin/bash
+
+while true; do
+  usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
+  echo "$(date): CPU Usage: $usage%" >> cpu_log.txt
+  sleep 5
+done
